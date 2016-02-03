@@ -1,0 +1,89 @@
+<!-- this is an AngularJS View Template -->
+<!-- it is necessary to create a module into which we place our ng-app -->
+<html ng-app="AngularJSExample">
+    <head>
+        <!-- from Google Hosted Libraries -->
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.17/angular.min.js"></script>
+        <script lang="javascript">
+        
+            var myModule = angular.module('AngularJSExample', []);
+            
+            //first register the controller - https://docs.angularjs.org/guide/migration
+            myModule.controller('CostController', 
+                //we make an AngularJS controller right here in the template (we won't normally do this though)
+                function ($scope) {
+                    
+                    var cc = this;
+                    
+                    cc.cost = 1000.1;
+                    cc.add_tax = true;
+                    cc.add_tip = true;
+                    cc.total_bill = true;
+                    
+                    function update(){
+                        cc.tax = cc.add_tax ? cc.cost * 0.0825 : 0.0;
+                        cc.tip = cc.add_tip? cc.cost * 0.10: 0.0;
+                        cc.total = parseFloat(cc.cost) + cc.tax + cc.tip; 
+                    }
+                    
+                    //used to detect when cost changes
+                    $scope.$watch('cc.cost', update);
+                    $scope.$watch('cc.add_tax', update);
+                    $scope.$watch('cc.add_tip', update);
+                    $scope.$watch('cc.cost + cc.tax + cc.tip', update);
+                    
+                    //final bill
+                    cc.final_bill = 0.0;
+                    cc.add = function add(){
+                        cc.final_bill += cc.total;   
+                    }
+                    
+                    //tip percent
+                    cc.tip_percent = [
+                        {amount:0.10, percent:"10%"},
+                        {amount:0.15, percent:"15%"},
+                        {amount:0.20, percent:"20%"}
+                    ];
+                    
+                    //tax states
+                    cc.tax_percent = [
+                        {amount:8.25, name:"Texas"},
+                        ];
+                        
+                     cc.tip = cc.tip_percent[0];
+                     cc.tax = cc.tax_percent[0];
+                }
+            );
+        </script>
+    </head>
+    <body>
+        <div ng-controller="CostController as cc">
+            <input type="checkbox" ng-model="cc.add_tax" />Add Tax
+            <input type ="checkbox" ng-model="cc.add_tip" />Add Tip
+            <input type="checkbox" ng-model="cc.total_bill" />Show Total
+            <p>
+                Cost: <input type="text" ng-model="cc.cost" placeholder="cost" /><br/>
+                Tip: <select ng-model="cc.tip" ng-options="t.percent for t in cc.tip_percent"></select>
+                Tax: <select ng-model="cc.tax" ng_options="t.name for t in cc.tax_percent"></select>
+            </p>
+            <p>
+                <!-- the angular directive both associates with the cost model and
+                uses a built-in formatting capability -->
+                This is your cost: {{cc.cost|currency}}
+            </p>
+            <p>
+                This is your tax: {{cc.tax|currency}}
+            </p>
+            <p>
+                This is your tip: {{cc.tip|currency}}
+            </p>
+            <p ng-show="cc.total_bill">
+                This is your total: {{cc.total|currency}}
+                <button ng-click="cc.add()">Add</button>
+            </p>
+            <p ng-show="cc.total_bill">
+                Your running total is {{cc.final_bill|currency}}
+            </p>
+        </div>
+    </body>
+</html>
